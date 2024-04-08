@@ -1,5 +1,6 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+<<<<<<< HEAD
 
 // let main = prompt("vad är ditt namn?")
 
@@ -89,3 +90,10 @@ function animate() {
     
   }
 animate()
+=======
+const canvasheight = 1000;
+const canvaswidth = 800 ;
+
+
+function animation()
+>>>>>>> 417157d0c07a63cd7215c09a01dd73fa34c6999c
