@@ -1,20 +1,22 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-
+let centerY = canvas.height / 2
+let centerX = canvas.width / 2
 // let main = prompt("vad är ditt namn?")
 
 let player = {
     // name: main,
-    x: 10,
-    y:10,
-    dx: 5, 
-    dy: 5,
+    x: centerX,
+    y: centerY,
+    dx: 10, 
+    dy: 10,
     direction: {
         left: false,
         right: false,
         up: false,
         down: false
-    }
+    },
+    circleSize: 20
 }
 
 document.addEventListener("keydown", (e) => {
@@ -46,46 +48,36 @@ document.addEventListener("keyup", (e) => {
 
 function animate() {
     requestAnimationFrame(animate)
-    ctx.clearRect(0, 0, 1200, 750 );
+    ctx.clearRect(0, 0, canvas.width, canvas.height );
 
     
-    if (player.direction.right == true) {
+    if (player.direction.right && player.x + player.circleSize < canvas.width) {
         player.x += player.dx;
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 20, 0, Math.PI * 2, true);
-        ctx.moveTo(player.x, player.y );
-        ctx.stroke();
-    } else if (player.direction.left == true) {
+    } else if (player.direction.left && player.x - player.circleSize > 0) {
         player.x -= player.dx;
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 20, 0, Math.PI * 2, true);
-        ctx.moveTo(player.x, player.y );
-        ctx.stroke();
     }
-    if (player.direction.down == true) {
+    if (player.direction.down && player.y + player.circleSize < canvas.height) {
         player.y += player.dy;
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 20, 0, Math.PI * 2, true);
-        ctx.moveTo(player.x, player.y );
-        ctx.stroke();
-    } else if (player.direction.up == true) {
+    } else if (player.direction.up && player.y - player.circleSize > 0) {
         player.y -= player.dy;
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 20, 0, Math.PI * 2, true);
-        ctx.moveTo(player.x, player.y );
-        ctx.stroke();
     } 
-    if (player.direction.up == false && player.direction.down == false && player.direction.left == false && player.direction.right == false)  {
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 20, 0, Math.PI * 2, true);
-        ctx.moveTo(player.x, player.y );
-        ctx.stroke();
-    }
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.circleSize, 0, Math.PI * 2, true);
+    ctx.moveTo(player.x, player.y );
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
 
-   
-   
+    // --------------------------------------------------------------------------------
 
-
-    
+ 
   }
+
+  numberOfObjects = 10
+  objectlist = []
+for (let objectNumber = 0; objectNumber < numberOfObjects; objectNumber++) {
+    
+    
+}
+
 animate()
