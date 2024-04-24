@@ -2,23 +2,25 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let centerY = canvas.height / 2
 let centerX = canvas.width / 2
-// let main = prompt("vad är ditt namn?")
 
 let player = {
-    // name: main,
     x: centerX - 70,
     y: centerY - 70,
     dx: 3, 
     dy: 3,
+    midX: this.x + 70,
+    midY: this.y + 70, 
     direction: {
         left: false,
         right: false,
         up: false,
         down: false
     },
-    circleSize: 20,
-    hp: 100
+    radius: 20,
+    hp: 100,
+    level: 1
 }
+
 
 bild = document.createElement("img");
 bild.src = "vapen.png";
@@ -46,7 +48,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
-    if (e.key == "d") {
+    if (e.key == "d" || e.key == "arrowRight") {
         player.direction.right = false;
     } else if (e.key == "a") {
         player.direction.left = false;
@@ -56,6 +58,7 @@ document.addEventListener("keyup", (e) => {
         player.direction.down = false;
     }
 });
+
 let enemies = [];
 
 function spawnEnemy() {
@@ -78,10 +81,14 @@ function spawnEnemy() {
     let enemy = {
         x: randomX,
         y: randomY,
-        dx: 2*(player.x - randomX) / Math.sqrt(Math.pow(player.x,2) + Math.pow(randomX,2)),
-        dy: 2*(player.y - randomY) / Math.sqrt(Math.pow(player.y,2) + Math.pow(randomY,2)),
+        dx: player.level*(player.x - randomX) / Math.sqrt(Math.pow(player.x,2) + Math.pow(randomX,2)),
+        dy: player.level*(player.y - randomY) / Math.sqrt(Math.pow(player.y,2) + Math.pow(randomY,2)),
+        radius: 20
     }
     enemies.push(enemy);
+}
+for (let i = 0; i < player.level + 10; i++) {
+    spawnEnemy()
 }
     
 function animate() {
@@ -112,9 +119,9 @@ function animate() {
         let enemy = enemies[i];
         enemy.x += enemy.dx;
         enemy.y += enemy.dy; 
-        if (enemy.x < -50 || enemy.x > canvas.width + 50) {
+        if (enemy.x < -50 || enemy.x > canvas.width + 50 || enemy.y < -50 || enemy.y > canvas.height + 50) {
             enemies.splice(i, 1);
-            i--;
+            spawnEnemy()
         }
         else {
             ctx.beginPath();
@@ -122,10 +129,16 @@ function animate() {
             ctx.fillStyle = "darkred";
             ctx.fill();
             ctx.closePath();
+
+            if (Math.sqrt(Math.pow(player.midX - enemy.x, 2) + Math.pow(player.midY - enemy.y, 2)) < 20) {
+                player.hp -= 10 
+                console.log(player.hp)
+            
+            }
         }
+    
     }
     frameIndex = (frameIndex + 1) % totalFrames
     }
 
-bild.onload = requestAnimationFrame(animate)
-setInterval(spawnEnemy, 3000); 
+bild.onload = requestAnimationFrame(animate); 
