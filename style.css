@@ -10,4 +10,50 @@ canvas {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: -1;
+}
+
+div {
+  position: absolute;
+  color: white;
+}
+
+#hp {
+  font-size: 30px;
+  margin-left: 265px;
+  z-index: 1;
+  top: 8px;
+}
+
+.leveltext {
+  top: 30%;
+  font-size: 50px;
+  margin-left: 60px;
+}
+
+#level {
+  margin-left: 95px;
+  top: 40%;
+  font-size: 100px;
+}
+
+.scoreboard {
+  top: 30%;
+  font-size: 50px;
+  margin-left: 1340px;
+}
+
+.dead {
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  background-color: black;
+}
+
+.restart button {
+  margin-top: 10px;
 }
