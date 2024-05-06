@@ -6,6 +6,9 @@ let healthpoints = document.getElementById("hp")
 let score = document.getElementById("score")
 let level = document.getElementById("level")
 
+let mouseX = 200;
+let mouseY = 200;
+
 
 let player = {
     x: centerX - 70,
@@ -27,8 +30,8 @@ let weapon = {
     x: player.x + 70,
     y: player.y + 70,
     radius: 5,
-    dx: 0,
-    dy: 0,
+    dx: 1,
+    dy: 1,
     speed: 10,
     angle: 0,
 }
@@ -56,6 +59,10 @@ document.addEventListener("keydown", (e) => {
     } 
     else if (e.key == "s") {
         player.direction.down = true;
+    }
+    else if (e.key = " "){
+        console.log(`mouse x: ${mouseX}`) //det här la han till för att se om musens position loggades när man klickar space
+        console.log(`mouse y: ${mouseY}`)
     }
 });
 
@@ -104,22 +111,36 @@ for (let i = 0; i < player.level + 10; i++) {
     spawnEnemy()
 }
 
-// if (player.hp <= 0){
-//     document.getElementById("dead").style.display = 'block'
+// let isGameRunning = true;
+
+// function restartGame() {
+//     isGameRunning = false;
+//     player.hp = 100;
+//     player.level = 1;
+//     enemies = [];
+//     for (let i = 0; i < player.level + 10 ; i++) {
+//         spawnEnemy();
+//     }
+//     document.getElementById("container").style.display = 'block'; // Visa dödsmeddelandet
 // }
-// else{
-//     document.getElementById("restart").style.display = 'none';
-// }
+
+// restartButton.onclick = function() {
+//     isGameRunning = true;
+//     document.getElementById("container").style.display = 'none'; // Dölj dödsmeddelandet
+//     requestAnimationFrame(animate);
+// };
+
 
 function levelUp() {
     player.level++;
   }
-  function animate() {
-      requestAnimationFrame(animate)
-      ctx.clearRect(-50, -50, canvas.width+100, canvas.height+100);
 
+function animate() {
+    requestAnimationFrame(animate)
+    ctx.clearRect(-50, -50, canvas.width+100, canvas.height+100);
+    if (!isGameRunning) return;
       
-      if( player.direction.up == false && player.direction.down == false && player.direction.left == false && player.direction.right == false){
+    if( player.direction.up == false && player.direction.down == false && player.direction.left == false && player.direction.right == false){
         ctx.drawImage(bild, 0 * spriteWidth, 0 * spriteHeight, spriteWidth, spriteHeight, player.x, player.y,  spriteWidth * scale, spriteHeight * scale) ;
     }
     if (player.direction.right && player.x + 100 < canvas.width) {
@@ -164,15 +185,12 @@ function levelUp() {
         
     })
 
-    canvas.addEventListener("mousemove", function(event) { 
-        mouseX = event.clientX - canvas.getBoundingClientRect().left;
-        mouseY = event.clientY - canvas.getBoundingClientRect().top;
-    })
+    
 
     weapon.dx = mouseX - player.x;
     weapon.dy = mouseY - player.y;
 
-    weapon.angle = Math.atan2(dy, dx);
+    weapon.angle = Math.atan2(weapon.dy, weapon.dx);
     
     weapon.x += Math.cos(weapon.angle) * weapon.speed
     weapon.y += Math.cos(weapon.angle) * weapon.speed
@@ -182,7 +200,16 @@ function levelUp() {
     healthpoints.innerHTML = (`HP: ${player.hp}`)
     level.innerHTML = (player.level)
     // score.innerHTML = (score)
+    if (player.hp <= 0){
+        restartGame()
+    }
     }
     
+canvas.addEventListener("mousemove", function(event) { 
+    mouseX = event.clientX - canvas.getBoundingClientRect().left; 
+    mouseY = event.clientY - canvas.getBoundingClientRect().top;
+})
+
+
 bild.onload = requestAnimationFrame(animate); 
 setInterval(levelUp, 30000);
