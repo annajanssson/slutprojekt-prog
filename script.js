@@ -48,32 +48,32 @@ const spriteHeight = 100
 const scale = 1.4
 
 document.addEventListener("keydown", (e) => {
-    if (e.key == "d") {
+    if (e.key == "d" || e.key == "ArrowRight") {
         player.direction.right = true;
     } 
-    else if (e.key == "a") {
+    else if (e.key == "a"|| e.key == "ArrowLeft") {
         player.direction.left = true;
     } 
-    else if (e.key =="w") {
+    else if (e.key =="w"|| e.key == "ArrowUp") {
         player.direction.up = true;
     } 
-    else if (e.key == "s") {
+    else if (e.key == "s"|| e.key == "ArrowDown") {
         player.direction.down = true;
     }
-    else if (e.key = " "){
-        console.log(`mouse x: ${mouseX}`) //det här la han till för att se om musens position loggades när man klickar space
-        console.log(`mouse y: ${mouseY}`)
+    else if (e.key === " ") {
+        console.log(`mouse x: ${mouseX}`);
+        console.log(`mouse y: ${mouseY}`);
     }
 });
 
 document.addEventListener("keyup", (e) => {
-    if (e.key == "d" || e.key == "arrowRight") {
+    if (e.key == "d" || e.key == "ArrowRight") {
         player.direction.right = false;
-    } else if (e.key == "a") {
+    } else if (e.key == "a"|| e.key == "ArrowLeft") {
         player.direction.left = false;
-    } else if (e.key == "w") {
+    } else if (e.key == "w"|| e.key == "ArrowUp") {
         player.direction.up = false;
-    } else if (e.key == "s") {
+    } else if (e.key == "s"|| e.key == "ArrowDown") {
         player.direction.down = false;
     }
 });
@@ -111,24 +111,39 @@ for (let i = 0; i < player.level + 10; i++) {
     spawnEnemy()
 }
 
-// let isGameRunning = true;
+let isGameRunning = true;  
+let intervalId;
 
-// function restartGame() {
-//     isGameRunning = false;
-//     player.hp = 100;
-//     player.level = 1;
-//     enemies = [];
-//     for (let i = 0; i < player.level + 10 ; i++) {
-//         spawnEnemy();
-//     }
-//     document.getElementById("container").style.display = 'block'; // Visa dödsmeddelandet
-// }
+function startLevelUpTimer() {
+    intervalId = setInterval(levelUp, 30000);
+}
 
-// restartButton.onclick = function() {
-//     isGameRunning = true;
-//     document.getElementById("container").style.display = 'none'; // Dölj dödsmeddelandet
-//     requestAnimationFrame(animate);
-// };
+function stopLevelUpTimer() {
+    clearInterval(intervalId);
+}
+
+
+function restartGame() {    //startar om spelet om man dör
+    isGameRunning = false;
+    player.hp = 100;
+    player.level = 1;
+    enemies = [];
+    for (let i = 0; i < player.level + 10 ; i++) {
+        spawnEnemy();
+    }
+    
+    document.getElementById("container").style.display = 'block'; // visa dödsmeddelandet när man dött
+    stopLevelUpTimer()
+}
+
+let restartButton = document.querySelector(".restartButton"); 
+
+restartButton.onclick = function() {
+    isGameRunning = true;
+    document.getElementById("container").style.display = 'none'; 
+    requestAnimationFrame(animate);
+    startLevelUpTimer();
+};
 
 
 function levelUp() {
@@ -138,7 +153,10 @@ function levelUp() {
 function animate() {
     requestAnimationFrame(animate)
     ctx.clearRect(-50, -50, canvas.width+100, canvas.height+100);
-    if (!isGameRunning) return;
+    if (!isGameRunning) {
+        document.getElementById("container").style.display = 'block';
+        return;
+    }
       
     if( player.direction.up == false && player.direction.down == false && player.direction.left == false && player.direction.right == false){
         ctx.drawImage(bild, 0 * spriteWidth, 0 * spriteHeight, spriteWidth, spriteHeight, player.x, player.y,  spriteWidth * scale, spriteHeight * scale) ;
@@ -201,8 +219,11 @@ function animate() {
     level.innerHTML = (player.level)
     // score.innerHTML = (score)
     if (player.hp <= 0){
-        restartGame()
+        restartGame();
+        isGameRunning = false; 
+        document.getElementById("container").style.display = 'block';
     }
+    
     }
     
 canvas.addEventListener("mousemove", function(event) { 
@@ -212,4 +233,4 @@ canvas.addEventListener("mousemove", function(event) {
 
 
 bild.onload = requestAnimationFrame(animate); 
-setInterval(levelUp, 30000);
+startLevelUpTimer()
