@@ -33,17 +33,31 @@ div {
   font-size: 50px;
   margin-left: 60px;
 }
-
-#level {
-  margin-left: 95px;
+.poäng {
   top: 40%;
   font-size: 100px;
 }
 
-.scoreboard {
+#level {
+  margin-left: 95px;
+}
+
+.box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#score {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.box {
   top: 30%;
   font-size: 50px;
-  margin-left: 1340px;
+  margin-left: 1360px;
 }
 
 .container {

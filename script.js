@@ -3,8 +3,9 @@ let ctx = canvas.getContext("2d");
 let centerY = canvas.height / 2;
 let centerX = canvas.width / 2;
 let healthpoints = document.getElementById("hp");
-let score = document.getElementById("score");
-let level = document.getElementById("level");
+let scoreDisplay = document.getElementById("score");
+let levelDisplay = document.getElementById("level");
+let ammo = document.getElementById("ammo");
 
 let mouseX = 200;
 let mouseY = 200;
@@ -35,7 +36,7 @@ let weapon = {
   angle: 0,
 };
 
-bild = document.createElement("img");
+let bild = document.createElement("img");
 bild.src = "vapen.png";
 bild.classList.add("image");
 
@@ -44,6 +45,7 @@ const totalFrames = 2;
 const spriteWidth = 100;
 const spriteHeight = 100;
 const scale = 1.4;
+let score = 0;
 
 document.addEventListener("keydown", (e) => {
   if (e.key == "d" || e.key == "ArrowRight") {
@@ -57,6 +59,7 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key === " ") {
     console.log(`mouse x: ${mouseX}`);
     console.log(`mouse y: ${mouseY}`);
+    spawnshot();
   }
 });
 
@@ -95,11 +98,15 @@ function spawnEnemy() {
     x: randomX,
     y: randomY,
     dx:
-      (player.level * (player.x - randomX)) /
-      Math.sqrt(Math.pow(player.x, 2) + Math.pow(randomX, 2)),
+      (player.level * (player.x + 70 - randomX)) /
+      Math.sqrt(
+        Math.pow(player.x - randomX, 2) + Math.pow(player.y - randomY, 2)
+      ),
     dy:
-      (player.level * (player.y - randomY)) /
-      Math.sqrt(Math.pow(player.y, 2) + Math.pow(randomY, 2)),
+      (player.level * (player.y + 70 - randomY)) /
+      Math.sqrt(
+        Math.pow(player.x - randomX, 2) + Math.pow(player.y - randomY, 2)
+      ),
     radius: 20,
   };
   enemies.push(enemy);
@@ -109,29 +116,60 @@ for (let i = 0; i < player.level + 10; i++) {
   spawnEnemy();
 }
 
-let isGameRunning = true;
-let intervalId;
+let shotlist = [];
 
-function startLevelUpTimer() {
-  intervalId = setInterval(levelUp, 30000);
+function spawnshot() {
+  if (shotlist.length < 20) {
+    let shot = {
+      x: player.x + 70,
+      y: player.y + 70,
+      dx:
+        (mouseX - (player.x + 70)) /
+        Math.sqrt(
+          Math.pow(player.x + 70 - mouseX, 2) +
+            Math.pow(player.y + 70 - mouseY, 2)
+        ),
+      dy:
+        (mouseY - (player.y + 70)) /
+        Math.sqrt(
+          Math.pow(player.x + 70 - mouseX, 2) +
+            Math.pow(player.y + 70 - mouseY, 2)
+        ),
+      radius: 7,
+    };
+    shotlist.push(shot);
+  }
 }
 
-function stopLevelUpTimer() {
+let isGameRunning = true;
+let intervalId;
+let scoreIntervalId;
+
+function startTimer() {
+  intervalId = setInterval(levelUp, 30000);
+  scoreIntervalId = setInterval(() => {
+    score += 100;
+  }, 10000);
+}
+
+function stopTimer() {
   clearInterval(intervalId);
+  clearInterval(scoreIntervalId);
 }
 
 function restartGame() {
-  //startar om spelet om man dör
   isGameRunning = false;
   player.hp = 100;
   player.level = 1;
+  score = 0;
   enemies = [];
+  shotlist = [];
   for (let i = 0; i < player.level + 10; i++) {
     spawnEnemy();
   }
 
-  document.getElementById("container").style.display = "block"; // visa dödsmeddelandet när man dött
-  stopLevelUpTimer();
+  document.getElementById("container").style.display = "block";
+  stopTimer();
 }
 
 let restartButton = document.querySelector(".restartButton");
@@ -140,7 +178,7 @@ restartButton.onclick = function () {
   isGameRunning = true;
   document.getElementById("container").style.display = "none";
   requestAnimationFrame(animate);
-  startLevelUpTimer();
+  startTimer();
 };
 
 function levelUp() {
@@ -261,37 +299,44 @@ function animate() {
     }
   }
 
-  let shotlist = [];
-  let shot = {
-    x: player.x,
-    y: player.y,
-    dx:
-      (mouseX - player.x) /
-      Math.sqrt(Math.pow(player.x, 2) + Math.pow(mouseX, 2)),
-    dy:
-      (mouseY - player.y) /
-      Math.sqrt(Math.pow(player.y, 2) + Math.pow(mouseY, 2)),
-    radius: 5,
-  };
+  for (let i = 0; i < shotlist.length; i++) {
+    let shot = shotlist[i];
+    shot.x += shot.dx;
+    shot.y += shot.dy;
+    ctx.beginPath();
+    ctx.arc(shot.x, shot.y, shot.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "blue";
+    ctx.fill();
+    ctx.closePath();
 
-  ctx.beginPath();
-  ctx.arc(shot.x, shot.y, shot.radius, 0, Math.PI * 2);
-  ctx.fillStyle = "blue";
-  ctx.fill();
-  ctx.closePath();
-
-  canvas.addEventListener("onclick", function (event) {
-    if (event.key === " ") {
+    for (let j = 0; j < enemies.length; j++) {
+      let enemy = enemies[j];
+      if (
+        Math.sqrt(
+          Math.pow(shot.x - enemy.x, 2) + Math.pow(shot.y - enemy.y, 2)
+        ) <=
+        shot.radius + enemy.radius
+      ) {
+        enemies.splice(j, 1);
+        shotlist.splice(i, 1);
+        score += 50;
+        spawnEnemy();
+        break;
+      }
     }
-  });
+  }
 
-  for (let i = 0; i < shotlist.length; i++) {}
+  if (ammo == 0) {
+    setTimeout((ammo = 20), 5000);
+  }
 
   frameIndex = (frameIndex + 1) % totalFrames;
 
   healthpoints.innerHTML = `HP: ${player.hp}`;
-  level.innerHTML = player.level;
-  // score.innerHTML = (score)
+  levelDisplay.innerHTML = player.level;
+  scoreDisplay.innerHTML = score;
+  ammo.innerHTML = `Ammunition: ${ammo}`;
+
   if (player.hp <= 0) {
     restartGame();
     isGameRunning = false;
@@ -305,4 +350,4 @@ canvas.addEventListener("mousemove", function (event) {
 });
 
 bild.onload = requestAnimationFrame(animate);
-startLevelUpTimer();
+startTimer();
