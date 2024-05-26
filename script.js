@@ -2,13 +2,34 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let centerY = canvas.height / 2;
 let centerX = canvas.width / 2;
+
 let healthpoints = document.getElementById("hp");
 let scoreDisplay = document.getElementById("score");
 let levelDisplay = document.getElementById("level");
-let ammo = document.getElementById("ammo");
+
+let ammoId = document.getElementById("ammo");
+let maxAmmo = 20;
+let currentAmmo = maxAmmo;
+
+let isGameRunning = true;
+let intervalId;
+let scoreIntervalId;
 
 let mouseX = 200;
 let mouseY = 200;
+
+let bild = document.createElement("img");
+bild.src = "vapen.png";
+bild.classList.add("image");
+
+let frameIndex = 0;
+const totalFrames = 2;
+const spriteWidth = 100;
+const spriteHeight = 100;
+const scale = 1.4;
+let score = 0;
+
+let restartButton = document.querySelector(".restartButton");
 
 let player = {
   x: centerX - 70,
@@ -26,27 +47,6 @@ let player = {
   level: 1,
 };
 
-let weapon = {
-  x: player.x + 70,
-  y: player.y + 70,
-  radius: 5,
-  dx: 1,
-  dy: 1,
-  speed: 10,
-  angle: 0,
-};
-
-let bild = document.createElement("img");
-bild.src = "vapen.png";
-bild.classList.add("image");
-
-let frameIndex = 0;
-const totalFrames = 2;
-const spriteWidth = 100;
-const spriteHeight = 100;
-const scale = 1.4;
-let score = 0;
-
 document.addEventListener("keydown", (e) => {
   if (e.key == "d" || e.key == "ArrowRight") {
     player.direction.right = true;
@@ -57,9 +57,7 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key == "s" || e.key == "ArrowDown") {
     player.direction.down = true;
   } else if (e.key === " ") {
-    console.log(`mouse x: ${mouseX}`);
-    console.log(`mouse y: ${mouseY}`);
-    spawnshot();
+    shoot();
   }
 });
 
@@ -76,6 +74,7 @@ document.addEventListener("keyup", (e) => {
 });
 
 let enemies = [];
+let shots = [];
 
 function spawnEnemy() {
   let randomiser = Math.random();
@@ -116,11 +115,10 @@ for (let i = 0; i < player.level + 10; i++) {
   spawnEnemy();
 }
 
-let shotlist = [];
-
-function spawnshot() {
-  if (shotlist.length < 20) {
-    let shot = {
+function shoot() {
+  if (currentAmmo > 0) {
+    currentAmmo--;
+    const shot = {
       x: player.x + 70,
       y: player.y + 70,
       dx:
@@ -137,13 +135,18 @@ function spawnshot() {
         ),
       radius: 7,
     };
-    shotlist.push(shot);
+    shots.push(shot);
+  } else {
+    reloading();
   }
 }
 
-let isGameRunning = true;
-let intervalId;
-let scoreIntervalId;
+function reloading() {
+  setTimeout(() => {
+    currentAmmo = maxAmmo;
+    ammoId.innerHTML = `Ammunition: ${currentAmmo}`;
+  }, 5000);
+}
 
 function startTimer() {
   intervalId = setInterval(levelUp, 30000);
@@ -163,16 +166,13 @@ function restartGame() {
   player.level = 1;
   score = 0;
   enemies = [];
-  shotlist = [];
+  shots = [];
   for (let i = 0; i < player.level + 10; i++) {
     spawnEnemy();
   }
-
   document.getElementById("container").style.display = "block";
   stopTimer();
 }
-
-let restartButton = document.querySelector(".restartButton");
 
 restartButton.onclick = function () {
   isGameRunning = true;
@@ -187,22 +187,22 @@ function levelUp() {
 
 function animate() {
   requestAnimationFrame(animate);
-  ctx.clearRect(-50, -50, canvas.width + 100, canvas.height + 100);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!isGameRunning) {
     document.getElementById("container").style.display = "block";
     return;
   }
 
   if (
-    player.direction.up == false &&
-    player.direction.down == false &&
-    player.direction.left == false &&
-    player.direction.right == false
+    !player.direction.up &&
+    !player.direction.down &&
+    !player.direction.left &&
+    !player.direction.right
   ) {
     ctx.drawImage(
       bild,
-      0 * spriteWidth,
-      0 * spriteHeight,
+      0,
+      0,
       spriteWidth,
       spriteHeight,
       player.x,
@@ -211,7 +211,8 @@ function animate() {
       spriteHeight * scale
     );
   }
-  if (player.direction.right && player.x + 100 < canvas.width) {
+
+  if (player.direction.right && player.x + spriteWidth < canvas.width) {
     player.x += player.dx;
     ctx.drawImage(
       bild,
@@ -224,12 +225,12 @@ function animate() {
       spriteWidth * scale,
       spriteHeight * scale
     );
-  } else if (player.direction.left && player.x + 35 > 0) {
+  } else if (player.direction.left && player.x > 0) {
     player.x -= player.dx;
     ctx.drawImage(
       bild,
       spriteWidth,
-      0 * spriteHeight,
+      0,
       spriteWidth,
       spriteHeight,
       player.x,
@@ -238,11 +239,12 @@ function animate() {
       spriteHeight * scale
     );
   }
-  if (player.direction.down && player.y + 100 < canvas.height) {
+
+  if (player.direction.down && player.y + spriteHeight < canvas.height) {
     player.y += player.dy;
     ctx.drawImage(
       bild,
-      0 * spriteWidth,
+      0,
       spriteHeight,
       spriteWidth,
       spriteHeight,
@@ -251,12 +253,12 @@ function animate() {
       spriteWidth * scale,
       spriteHeight * scale
     );
-  } else if (player.direction.up && player.y + 35 > 0) {
+  } else if (player.direction.up && player.y > 0) {
     player.y -= player.dy;
     ctx.drawImage(
       bild,
-      0 * spriteWidth,
-      0 * spriteHeight,
+      0,
+      0,
       spriteWidth,
       spriteHeight,
       player.x,
@@ -267,7 +269,6 @@ function animate() {
   }
 
   for (let i = 0; i < enemies.length; i++) {
-    //enemy funktionen, spawna, krocka, hamna utanför
     let enemy = enemies[i];
     enemy.x += enemy.dx;
     enemy.y += enemy.dy;
@@ -299,10 +300,10 @@ function animate() {
     }
   }
 
-  for (let i = 0; i < shotlist.length; i++) {
-    let shot = shotlist[i];
-    shot.x += shot.dx;
-    shot.y += shot.dy;
+  for (let i = 0; i < shots.length; i++) {
+    let shot = shots[i];
+    shot.x += shot.dx * 5;
+    shot.y += shot.dy * 5;
     ctx.beginPath();
     ctx.arc(shot.x, shot.y, shot.radius, 0, Math.PI * 2);
     ctx.fillStyle = "blue";
@@ -318,7 +319,7 @@ function animate() {
         shot.radius + enemy.radius
       ) {
         enemies.splice(j, 1);
-        shotlist.splice(i, 1);
+        shots.splice(i, 1);
         score += 50;
         spawnEnemy();
         break;
@@ -326,16 +327,12 @@ function animate() {
     }
   }
 
-  if (ammo == 0) {
-    setTimeout((ammo = 20), 5000);
-  }
-
   frameIndex = (frameIndex + 1) % totalFrames;
 
   healthpoints.innerHTML = `HP: ${player.hp}`;
   levelDisplay.innerHTML = player.level;
   scoreDisplay.innerHTML = score;
-  ammo.innerHTML = `Ammunition: ${ammo}`;
+  ammoId.innerHTML = `Ammunition: ${currentAmmo}`;
 
   if (player.hp <= 0) {
     restartGame();
@@ -349,5 +346,7 @@ canvas.addEventListener("mousemove", function (event) {
   mouseY = event.clientY - canvas.getBoundingClientRect().top;
 });
 
-bild.onload = requestAnimationFrame(animate);
-startTimer();
+bild.onload = () => {
+  requestAnimationFrame(animate);
+  startTimer();
+};
