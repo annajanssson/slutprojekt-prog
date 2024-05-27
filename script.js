@@ -212,8 +212,8 @@ function animate() {
     );
   }
 
-  if (player.direction.right && player.x + spriteWidth < canvas.width) {
-    player.x += player.dx;
+  if (player.direction.right && player.x + spriteWidth <= canvas.width) {
+    player.x += (player.dx * player.level) / 2;
     ctx.drawImage(
       bild,
       spriteWidth,
@@ -225,8 +225,8 @@ function animate() {
       spriteWidth * scale,
       spriteHeight * scale
     );
-  } else if (player.direction.left && player.x > 0) {
-    player.x -= player.dx;
+  } else if (player.direction.left && player.x + 45 >= 0) {
+    player.x -= (player.dx * player.level) / 2;
     ctx.drawImage(
       bild,
       spriteWidth,
@@ -240,8 +240,8 @@ function animate() {
     );
   }
 
-  if (player.direction.down && player.y + spriteHeight < canvas.height) {
-    player.y += player.dy;
+  if (player.direction.down && player.y + spriteHeight <= canvas.height) {
+    player.y += (player.dy * player.level) / 2;
     ctx.drawImage(
       bild,
       0,
@@ -253,8 +253,58 @@ function animate() {
       spriteWidth * scale,
       spriteHeight * scale
     );
-  } else if (player.direction.up && player.y > 0) {
-    player.y -= player.dy;
+  } else if (player.direction.up && player.y + 45 >= 0) {
+    player.y -= player.dy * (player.level / 2);
+    ctx.drawImage(
+      bild,
+      0,
+      0,
+      spriteWidth,
+      spriteHeight,
+      player.x,
+      player.y,
+      spriteWidth * scale,
+      spriteHeight * scale
+    );
+  }
+
+  if (player.direction.right) {
+    ctx.drawImage(
+      bild,
+      spriteWidth,
+      spriteHeight,
+      spriteWidth,
+      spriteHeight,
+      player.x,
+      player.y,
+      spriteWidth * scale,
+      spriteHeight * scale
+    );
+  } else if (player.direction.left) {
+    ctx.drawImage(
+      bild,
+      spriteWidth,
+      0,
+      spriteWidth,
+      spriteHeight,
+      player.x,
+      player.y,
+      spriteWidth * scale,
+      spriteHeight * scale
+    );
+  } else if (player.direction.down) {
+    ctx.drawImage(
+      bild,
+      0,
+      spriteHeight,
+      spriteWidth,
+      spriteHeight,
+      player.x,
+      player.y,
+      spriteWidth * scale,
+      spriteHeight * scale
+    );
+  } else if (player.direction.up) {
     ctx.drawImage(
       bild,
       0,
